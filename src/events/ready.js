@@ -1,0 +1,52 @@
+export default {
+  name: 'ready',
+  once: true,
+  async execute(client) {
+    console.log(`✅ EvoMC Bot is online as ${client.user.tag}`);
+    client.user.setActivity('EvoMC Server 🎮', { type: 0 });
+
+    const { REST, Routes } = await import('discord.js');
+    const { readdirSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, join } = await import('path');
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+
+    const commands = [];
+    const commandsPath = join(__dirname, '..', 'commands');
+    const commandFiles = readdirSync(commandsPath).filter(f => f.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const filePath = join(commandsPath, file);
+      const command = await import(filePath);
+      if ('data' in command.default) {
+        commands.push(command.default.data.toJSON());
+      }
+    }
+
+    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    const guildId = process.env.GUILD_ID;
+
+    try {
+      // Register globally so all servers get the commands
+      await rest.put(
+        Routes.applicationCommands(clientId),
+        { body: commands },
+      );
+      console.log(`✅ Registered ${commands.length} slash commands globally (all servers).`);
+
+      // Also register to the main guild for instant update
+      if (guildId) {
+        await rest.put(
+          Routes.applicationGuildCommands(clientId, guildId),
+          { body: commands },
+        );
+        console.log(`✅ Also registered to main guild ${guildId} instantly.`);
+      }
+    } catch (err) {
+      console.error('Failed to register commands:', err);
+    }
+  },
+};
