@@ -27,15 +27,13 @@ export default {
 
     const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     const clientId = process.env.DISCORD_CLIENT_ID;
-    const guildId = process.env.GUILD_ID;
 
     try {
-        await rest.put(
-          Routes.applicationGuildCommands(clientId, guildId),
-          { body: commands },
-        );
-        console.log(`✅ Also registered to main guild ${guildId} instantly.`);
-      }
+      await rest.put(
+        Routes.applicationCommands(clientId),
+        { body: commands },
+      );
+      console.log(`✅ Registered ${commands.length} slash commands globally.`);
     } catch (err) {
       console.error('Failed to register commands:', err);
     }
