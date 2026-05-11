@@ -30,15 +30,6 @@ export default {
     const guildId = process.env.GUILD_ID;
 
     try {
-      // Register globally so all servers get the commands
-      await rest.put(
-        Routes.applicationCommands(clientId),
-        { body: commands },
-      );
-      console.log(`✅ Registered ${commands.length} slash commands globally (all servers).`);
-
-      // Also register to the main guild for instant update
-      if (guildId) {
         await rest.put(
           Routes.applicationGuildCommands(clientId, guildId),
           { body: commands },
