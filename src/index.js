@@ -19,7 +19,6 @@ server.listen(PORT, '0.0.0.0', () => {
 });
 
 // ── Self-ping to prevent Render free tier from sleeping ────────────────────
-// Pings itself every 10 minutes so the bot NEVER goes offline.
 const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 setInterval(() => {
   import('https').then(({ default: https }) => {
@@ -42,19 +41,27 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildModeration,
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
-client.commands = new Collection();
-client.prefixCommands = new Collection();
-client.prefixes = new Map();
-client.autoReactions = new Map();
-client.autoRoles = new Map();
-client.giveaways = new Map();
-client.tickets = new Map();
-client.ticketConfigs = new Map();
+// ── Bot state maps ──────────────────────────────────────────────────────────
+client.commands        = new Collection();
+client.prefixCommands  = new Collection();
+client.prefixes        = new Map();
+client.autoReactions   = new Map();
+client.autoRoles       = new Map();
+client.giveaways       = new Map();
+client.tickets         = new Map();
+client.ticketConfigs   = new Map();
+// New
+client.logChannels     = new Map();  // guildId → { message, member, role, channel, voice, mod }
+client.countingConfigs = new Map();  // guildId → { channelId, current, lastUserId, highScore }
+client.autoResponders  = new Map();  // guildId → [{ trigger, response, title, color }]
 
+// ── Load commands ───────────────────────────────────────────────────────────
 const commandsPath = join(__dirname, 'commands');
 const commandFiles = readdirSync(commandsPath).filter(f => f.endsWith('.js'));
 
@@ -69,6 +76,7 @@ for (const file of commandFiles) {
   }
 }
 
+// ── Load events ─────────────────────────────────────────────────────────────
 const eventsPath = join(__dirname, 'events');
 const eventFiles = readdirSync(eventsPath).filter(f => f.endsWith('.js'));
 
@@ -82,7 +90,7 @@ for (const file of eventFiles) {
   }
 }
 
-// Prevent crashes from unhandled errors
+// ── Error guards ─────────────────────────────────────────────────────────────
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err?.message || err);
 });
