@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // ── Keep-alive HTTP server ──────────────────────────────────────────────────
-// UptimeRobot pings this URL every 5 min to keep the bot awake for free.
 const PORT = process.env.PORT || 3000;
 const server = createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -18,6 +17,20 @@ const server = createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Keep-alive server running on port ${PORT}`);
 });
+
+// ── Self-ping to prevent Render free tier from sleeping ────────────────────
+// Pings itself every 10 minutes so the bot NEVER goes offline.
+const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+setInterval(() => {
+  import('https').then(({ default: https }) => {
+    import('http').then(({ default: http }) => {
+      const lib = SELF_URL.startsWith('https') ? https : http;
+      lib.get(SELF_URL, (res) => {
+        console.log(`🔄 Self-ping OK (${res.statusCode}) — bot stays awake`);
+      }).on('error', () => {});
+    });
+  });
+}, 10 * 60 * 1000); // every 10 minutes
 
 // ── Discord client ──────────────────────────────────────────────────────────
 const client = new Client({
