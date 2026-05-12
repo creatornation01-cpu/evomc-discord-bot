@@ -93,6 +93,20 @@ for (const file of eventFiles) {
   }
 }
 
+// Catch Discord WebSocket errors
+client.on('error', (err) => {
+  console.error('❌ Client error:', err.message);
+});
+client.on('shardError', (err) => {
+  console.error('❌ Shard/WebSocket error:', err.message);
+});
+client.on('warn', (info) => {
+  console.warn('⚠️ Warning:', info);
+});
+client.on('invalidated', () => {
+  console.error('❌ Session invalidated — token may be invalid!');
+});
+
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err?.message || err);
 });
@@ -101,7 +115,9 @@ process.on('uncaughtException', (err) => {
 });
 
 console.log('🔐 Attempting Discord login...');
+console.log('🔑 Token exists:', !!process.env.DISCORD_TOKEN);
+console.log('🔑 Token length:', process.env.DISCORD_TOKEN?.length || 0);
+
 client.login(process.env.DISCORD_TOKEN).catch(err => {
   console.error('❌ Discord login FAILED:', err.message);
-  process.exit(1);
 });
