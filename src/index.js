@@ -93,7 +93,6 @@ for (const file of eventFiles) {
   }
 }
 
-// Catch Discord WebSocket errors
 client.on('error', (err) => {
   console.error('❌ Client error:', err.message);
 });
@@ -113,6 +112,17 @@ process.on('unhandledRejection', (err) => {
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err?.message || err);
 });
+
+// Token validity test — Discord API direct ping
+try {
+  const testRes = await fetch('https://discord.com/api/v10/users/@me', {
+    headers: { Authorization: `Bot ${process.env.DISCORD_TOKEN}` }
+  });
+  const testData = await testRes.json();
+  console.log('🔑 Discord API test:', testRes.status, JSON.stringify(testData));
+} catch (e) {
+  console.error('❌ Cannot reach Discord API:', e.message);
+}
 
 console.log('🔐 Attempting Discord login...');
 console.log('🔑 Token exists:', !!process.env.DISCORD_TOKEN);
