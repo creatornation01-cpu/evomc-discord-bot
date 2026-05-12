@@ -1,8 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
 
-const AI_BASE_URL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
-const AI_API_KEY = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-
 // Animated emojis for autoresponder
 const ANIMATED_EMOJIS = ['✨', '🌟', '⚡', '🎯', '🔥', '💫', '🎮', '🏆', '💎', '🚀'];
 
@@ -23,14 +20,13 @@ Keep answers concise, friendly, and use Minecraft-themed language when appropria
     generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
   });
 
-  const baseUrl = AI_BASE_URL?.replace(/\/$/, '');
-  const url = `${baseUrl}/v1beta/models/gemini-2.5-flash:generateContent`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
 
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': AI_API_KEY,
+      'x-goog-api-key': process.env.GEMINI_API_KEY,
     },
     body,
     signal: AbortSignal.timeout(15000),
