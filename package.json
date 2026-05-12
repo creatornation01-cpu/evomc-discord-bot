@@ -1,16 +1,13 @@
 {
-  "name": "@workspace/discord-bot",
-  "version": "0.0.0",
+  "name": "evomc-discord-bot",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=.env src/index.js 2>/dev/null || node src/index.js",
     "start": "node src/index.js",
-    "deploy-commands": "node src/deploy-commands.js",
-    "typecheck": "echo 'No typecheck for discord-bot'"
+    "dev": "node src/index.js"
   },
   "dependencies": {
-    "@google/genai": "^1.0.0",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5"
   }
