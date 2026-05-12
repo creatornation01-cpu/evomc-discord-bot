@@ -101,4 +101,7 @@ process.on('uncaughtException', (err) => {
 });
 
 console.log('🔐 Attempting Discord login...');
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).catch(err => {
+  console.error('❌ Discord login FAILED:', err.message);
+  process.exit(1);
+});
