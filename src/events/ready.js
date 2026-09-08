@@ -1,5 +1,5 @@
 export default {
-  name: 'clientready',
+  name: 'ready',
   once: true,
   async execute(client) {
     console.log(`✅ EvoMC Bot is online as ${client.user.tag}`);
